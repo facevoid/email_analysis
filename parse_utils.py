@@ -6,6 +6,7 @@ import re
 
 
 def parse_raw_message(raw_message):
+    
     lines = raw_message.split('\n')
     email = {}
     message = ''
@@ -15,6 +16,9 @@ def parse_raw_message(raw_message):
         
         if ':' not in line:
             if not subject_found:
+                continue
+            forward_index = raw_message.rfind('- Forwarded by')
+            if forward_index != -1:
                 continue
             message += line.strip() + ' '
             email['body'] = message
@@ -27,12 +31,10 @@ def parse_raw_message(raw_message):
             if key in ['subject', 'to', 'cc']:
                 subject_found = True
     if 'body' in email.keys():
-        email['body'] = re.sub(r'([,?.])', r' \1 ', email['body'])  #Use regex for more punctuation to do at once
-        email['body'] = email['body'].lower()
+        email['body'] = re.sub(r'([,?!])', r' \1 ', email['body'])  #Use regex for more punctuation to do at once
         email['body'] = re.sub(' +', ' ', email['body'])
         email['body'] = email['body'].strip()
     return email
-
 def parse_into_emails(messages):
     emails = [parse_raw_message(message) for message in messages]
         
